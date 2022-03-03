@@ -62,7 +62,7 @@ noise_std = np.sqrt(1 / (2 * R * snr_train))
 
 ######################基本的函数###################
 """ Basic functions """
-def channel(U):
+def channel(U):                             # 高斯噪声信道函数
     Y = U + K.random_normal(K.shape(U), mean=0, stddev=noise_std)
     return Y
 
