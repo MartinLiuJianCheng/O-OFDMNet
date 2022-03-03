@@ -24,15 +24,16 @@ from keras.optimizers import Adam
 from utils import *
 
 # ----------------- parameters set up ------------
-N = 64  # number of channel uses
-M = 2   # total modulation size
-m = int(np.log2(M))  # bits per symbol vector
-SNRdB_train = 8
-b_size = 1000
+N = 64  # number of channel uses  #用了多少个信道，即OFDM符号的频率有多少，一般是64
+M = 2   # total modulation size  
+m = int(np.log2(M))  # bits per symbol vector   每一个符号有多少个bit
+
+SNRdB_train = 8      #   
+b_size = 1000     
 use_batch_norm = True
 loss_scale = 0.001 #loss scaling factor
 
-version = '01'
+version = '01'   
 file_name = 'O_OFDMNet_N'+str(N)+'_M'+str(M)+'_ls'+str(loss_scale)+'_'+version
 
 # network config, train, test data
@@ -59,12 +60,13 @@ R = m
 snr_train = 10 ** (SNRdB_train / 10.0)
 noise_std = np.sqrt(1 / (2 * R * snr_train))
 
+######################基本的函数###################
 """ Basic functions """
 def channel(U):
     Y = U + K.random_normal(K.shape(U), mean=0, stddev=noise_std)
     return Y
 
-def ifft_transform(Z):
+def ifft_transform(Z):                      # ifft转换函数
     Z = Reshape((N, 2))(Z)
     Zc = tf.complex(Z[:, :, 0], Z[:, :, 1])
     Zt = tf.signal.ifft(Zc) * np.sqrt(N)
@@ -73,7 +75,7 @@ def ifft_transform(Z):
     Zt = K.concatenate([Zt_r, Zt_i])
     return Zt
 
-def fft_transform(Z):
+def fft_transform(Z):                       # fft转换函数
     Z = Reshape((N, 2))(Z)
     Zc = tf.complex(Z[:, :, 0], Z[:, :, 1])
     Zf = tf.signal.fft(Zc) / np.sqrt(N)
@@ -88,6 +90,7 @@ def get_papr(Zt):
     return papr
 
 """ build autoencoder model"""
+############################################   发送部分   ############################################################
 # encoder
 X = Input(shape=(2 * N,))
 
@@ -96,7 +99,7 @@ Zt = Lambda(lambda x: ifft_transform(x))(X)
 enc = Zt
 encoder_Zt = Model(X,Zt)
 
-# encoder - time domain
+# encoder - time domain   
 if len(hidden_layers_enc) > 0:
     for i, num_nodes in enumerate(hidden_layers_enc):
         if use_batch_norm:
@@ -115,6 +118,12 @@ else:
 # Y is input of decoder, Y may include received signal y=hx+n and channel h
 Y = Lambda(lambda x: channel(x))(U)
 dec = Y
+
+
+#######################################   接受部分   ###############################################
+
+
+
 
 # decoder
 for i, num_nodes in enumerate(hidden_layers_dec):
