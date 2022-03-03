@@ -13,7 +13,7 @@ def channel_test(U, noise_std):
     return Y
 
 
-# generate data
+# generate data      数据产生，经过QAM调制
 def qam_constellation(M):
     a = 1/np.sqrt(2)
     b = np.sqrt(3)
@@ -63,7 +63,7 @@ def generate_data_qam_symbols(M=4, N=16, num_samples=5, time_domain=False):
     
     return bits, sym_com, sym_real
 
-def qam_to_bits(X, M):   
+def qam_to_bits(X, M):       #将QAM信号变为bit位
     m = int(np.log2(M))
     bits = np.zeros((len(X),m), dtype=int)
     QAM = qam_constellation(M)
@@ -75,7 +75,7 @@ def qam_to_bits(X, M):
                 bits[i,:] = bit_ref[j,:]
     return bits
 
-def prediction_to_bits(X_pred, M):
+def prediction_to_bits(X_pred, M):         
     N = int(X_pred.shape[1]/2)
     m = int(np.log2(M))
     bits_re = np.zeros((len(X_pred),N,m), dtype=int)
